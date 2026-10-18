@@ -38,11 +38,18 @@ const ICONS = {
   other: '<svg class="icon other" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8Zm1.5 0a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Zm3.75-.75h5.5a.75.75 0 0 1 0 1.5h-5.5a.75.75 0 0 1 0-1.5Z"/></svg>',
 };
 
+/** One of the ICONS strings as an SVG element, without going through innerHTML. */
+function parseSvg(markup) {
+  const svg = markup.replace("<svg ", '<svg xmlns="http://www.w3.org/2000/svg" ');
+  const doc = new DOMParser().parseFromString(svg, "image/svg+xml");
+  return document.importNode(doc.documentElement, true);
+}
+
 function el(tag, props = {}, ...children) {
   const node = document.createElement(tag);
   for (const [k, v] of Object.entries(props)) {
     if (k === "class") node.className = v;
-    else if (k === "html") node.innerHTML = v; // only used with the static icon strings above
+    else if (k === "svg") node.append(parseSvg(v)); // only used with the static icon strings above
     else if (k.startsWith("on")) node.addEventListener(k.slice(2), v);
     else if (v !== undefined && v !== null && v !== false) node.setAttribute(k, v);
   }
@@ -351,7 +358,7 @@ function renderRow(e) {
   return el(
     "div",
     { class: `row ${e.state}` },
-    el("span", { html: ICONS[e.state], title: LABELS[e.state] }),
+    el("span", { svg: ICONS[e.state], title: LABELS[e.state] }),
     el(
       "div",
       { class: "main" },

@@ -13,7 +13,7 @@ A browser extension that adds an account-wide **All actions** view to GitHub, ne
 - Optional desktop notifications when a workflow fails or doesn't run, and separately when one passes (both off by default).
 - It runs entirely in your browser. There's no server: it talks to GitHub's API directly with your own read-only token.
 
-> Status: early version, before 1.0. Works in Chrome, Edge, Brave and other Chromium browsers. Firefox support comes later.
+> Status: early version, before 1.0. Works in Chrome, Edge, Brave and other Chromium browsers, and in Firefox 140 or later.
 
 It follows your GitHub theme. Here's every workflow in dark mode:
 
@@ -30,6 +30,17 @@ It follows your GitHub theme. Here's every workflow in dark mode:
 3. Turn on **Developer mode**.
 4. Click **Load unpacked** and choose the unzipped folder (the one containing `manifest.json`).
 5. The setup page opens automatically. After setup, open the list from the new Actions icon on GitHub or the extension's toolbar icon.
+
+### Firefox
+
+Firefox only keeps add-ons that Mozilla has signed, so until the extension is on Firefox Add-ons, you can try it as a temporary add-on:
+
+1. Download **all-actions-for-github.zip** from the [latest release](https://github.com/amorphose/All-Actions-for-GitHub/releases/latest).
+2. Open `about:debugging`, choose **This Firefox**, and click **Load Temporary Add-on**.
+3. Pick the zip (or `manifest.json` from the unzipped folder).
+4. If the setup page shows **Allow access to GitHub**, click **Allow access**. Firefox can leave the extension switched off on github.com until you agree.
+
+A temporary add-on is removed when Firefox closes, along with its token and settings.
 
 ### Updating
 
@@ -81,8 +92,8 @@ GitHub runs schedules in UTC and often starts them hours late at busy times, so 
 
 ## Roadmap
 
-- **Next:** Firefox support.
-- **Later:** store listings (Chrome Web Store, Edge Add-ons, Firefox Add-ons), "Sign in with GitHub" instead of a token, organization repos, a Re-run button.
+- **Next:** store listings (Chrome Web Store, Edge Add-ons, Firefox Add-ons).
+- **Later:** "Sign in with GitHub" instead of a token, organization repos, a Re-run button.
 
 ## License
 
