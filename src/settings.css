@@ -71,6 +71,7 @@ code { font: 12px ui-monospace, SFMono-Regular, Menlo, monospace; background: va
 .status.err { color: var(--err); }
 .radio { border: 0; padding: 0; margin: 0; display: grid; gap: 4px; }
 .radio label { display: flex; gap: 8px; align-items: center; }
+.notice { border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 6px; padding: 10px 14px; background: var(--bg-subtle); display: grid; gap: 8px; }
 .about { margin-top: 12px; font-size: 12px; text-align: center; }
 .actions { display: flex; gap: 8px; align-items: center; }
 .check { display: flex; gap: 8px; align-items: center; }

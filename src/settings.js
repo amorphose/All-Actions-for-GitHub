@@ -17,14 +17,30 @@ const TOKEN_URL =
 
 const REPO_URL = "https://github.com/amorphose/All-Actions-for-GitHub";
 
+// Chrome and Edge grant these at install. Firefox can leave them for the person to allow.
+const SITE_ACCESS = { origins: ["https://github.com/*", "https://api.github.com/*"] };
+
 const $ = (id) => document.getElementById(id);
+
+async function showAccess() {
+  $("access").hidden = await chrome.permissions.contains(SITE_ACCESS).catch(() => true);
+}
+
+async function onAccessGrant() {
+  // Must be requested straight from the click, before anything else is awaited.
+  const granted = await chrome.permissions.request(SITE_ACCESS).catch(() => false);
+  await showAccess();
+  if (granted && (await getToken())) chrome.runtime.sendMessage({ type: "refresh" }).catch(() => {});
+}
 
 /** Version line and a "Report a problem" link that starts the issue with the version and browser. */
 function showAbout() {
   const { version } = chrome.runtime.getManifest();
   $("about-version").textContent = `All Actions for GitHub ${version}`;
   const brands = navigator.userAgentData?.brands?.map((b) => `${b.brand} ${b.version}`) ?? [];
-  const browser = brands.find((b) => !/Chromium|Not.?A.?Brand/i.test(b)) || brands[0] || navigator.userAgent;
+  const firefox = navigator.userAgent.match(/Firefox\/(\d+)/);
+  const browser = brands.find((b) => !/Chromium|Not.?A.?Brand/i.test(b)) || brands[0]
+    || (firefox ? `Firefox ${firefox[1]}` : navigator.userAgent);
   const body = `**What happened?**\n\n\n**What did you expect?**\n\n\n---\nExtension version: ${version}\nBrowser: ${browser}\n`;
   $("report-link").href = `${REPO_URL}/issues/new?${new URLSearchParams({ body })}`;
 }
@@ -123,6 +139,8 @@ async function onDisconnect() {
 async function init() {
   $("token-link").href = TOKEN_URL;
   showAbout();
+  showAccess();
+  $("access-grant").addEventListener("click", onAccessGrant);
   const settings = await getSettings();
   $("scope-scheduled").checked = settings.scheduledOnly;
   $("scope-all").checked = !settings.scheduledOnly;

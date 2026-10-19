@@ -13,7 +13,7 @@ A browser extension that adds an account-wide **All actions** view to GitHub, ne
 - Optional desktop notifications when a workflow fails or doesn't run, and separately when one passes (both off by default).
 - It runs entirely in your browser. There's no server: it talks to GitHub's API directly with your own read-only token.
 
-> Status: early version (0.6). Works in Chrome, Edge, Brave and other Chromium browsers. Firefox support comes later.
+> Status: early version, before 1.0. Works in Chrome, Edge, Brave and other Chromium browsers, and in Firefox 140 or later.
 
 It follows your GitHub theme. Here's every workflow in dark mode:
 
@@ -23,7 +23,7 @@ It follows your GitHub theme. Here's every workflow in dark mode:
 
 ## Install
 
-1. Download **all-actions-for-github.zip** from the [latest release](https://github.com/amorphose/All-Actions-for-GitHub/releases/latest) and unzip it somewhere you'll keep it. (Or `git clone` this repository.)
+1. Download **all-actions-for-github.zip** from the [latest release](https://github.com/amorphose/All-Actions-for-GitHub/releases/latest) and unzip it somewhere you'll keep it.
 2. Open your browser's extensions page:
    - Chrome / Brave: `chrome://extensions`
    - Edge: `edge://extensions`
@@ -31,11 +31,22 @@ It follows your GitHub theme. Here's every workflow in dark mode:
 4. Click **Load unpacked** and choose the unzipped folder (the one containing `manifest.json`).
 5. The setup page opens automatically. After setup, open the list from the new Actions icon on GitHub or the extension's toolbar icon.
 
+### Firefox
+
+Firefox only keeps add-ons that Mozilla has signed, so until the extension is on Firefox Add-ons, you can try it as a temporary add-on:
+
+1. Download **all-actions-for-github-firefox.zip** from the [latest release](https://github.com/amorphose/All-Actions-for-GitHub/releases/latest). (The other zip is for Chrome and Edge.)
+2. Open `about:debugging`, choose **This Firefox**, and click **Load Temporary Add-on**.
+3. Pick the zip (or `manifest.json` from the unzipped folder).
+4. If the setup page shows **Allow access to GitHub**, click **Allow access**. Firefox can leave the extension switched off on github.com until you agree.
+
+Firefox removes a temporary add-on when it closes, so load it again after you restart Firefox. Your token and settings are kept. To update, load the newer zip the same way.
+
 ### Updating
 
 Your token and settings are kept when you update, so setup is a one-time step.
 
-1. Get the new files **into the same folder**: unzip the new release over the old folder, replacing the files (or `git pull`).
+1. Get the new files **into the same folder**: unzip the new release over the old folder, replacing the files.
 2. On the extensions page, click the reload icon on the extension's card.
 3. Refresh any open GitHub tabs.
 
@@ -50,7 +61,7 @@ The setup page walks you through this:
    - **Contents: Read** to read each workflow file's `schedule:` so the extension can tell when a run is missing. Without it everything else still works; you just won't see "didn't run" warnings.
 2. Under **Repository access**, choose **All repositories**, or only the repos you want watched. Then click **Generate token**.
 3. Copy the token and paste it into the setup page, then click **Connect**.
-4. Choose whether to watch **scheduled workflows only** (the default) or **every workflow run**, optionally turn on desktop notifications, and click **Open All actions**.
+4. Choose whether to watch **scheduled workflows only** (the default) or **every workflow run**, optionally shorten how late a scheduled run can be before it counts as missed, optionally turn on desktop notifications, and click **Open All actions**.
 
 Upgrading from 0.2 or earlier? Your token keeps working. To get "didn't run" warnings, [edit the token on GitHub](https://github.com/settings/personal-access-tokens), add **Contents: Read** under Repository permissions and save; the token value doesn't change.
 
@@ -67,7 +78,7 @@ See the [privacy policy](PRIVACY.md) for everything the extension stores and sen
 | Piece | File | What it does |
 |---|---|---|
 | All actions page | `src/view.*` | The list itself, rendered in a shadow root so GitHub's styles and ours don't collide. It uses GitHub's own color variables, so it follows your GitHub theme. |
-| Settings | `src/settings.*` | Token setup and the scheduled-only option. |
+| Settings | `src/settings.*` | Token setup, what to watch, the missed-run delay, notifications, and links to report a problem. |
 | GitHub client | `src/lib/github.js` | Lists your repos (`GET /user/repos`), then recent runs per repo (`GET /repos/{owner}/{repo}/actions/runs`). GitHub has no account-wide runs endpoint, so it's one request per repo, six at a time. |
 | Run logic | `src/lib/runs.js`, `src/lib/cron.js` | Groups runs by workflow, classifies them (failed, didn't run, running, passed, cancelled/skipped), works out when each schedule last should have fired, sorts and formats. No browser APIs, so it's unit-tested in Node. |
 | GitHub integration | `src/content.js`, `src/early.js` | Copies GitHub's own Pull requests link, turns it into an Actions link, and inserts it just before Pull requests. On `github.com/?all-actions` it hides the page body and shows the list in its place, under GitHub's real top bar. |
@@ -81,8 +92,8 @@ GitHub runs schedules in UTC and often starts them hours late at busy times, so 
 
 ## Roadmap
 
-- **Next:** Firefox support.
-- **Later:** store listings (Chrome Web Store, Edge Add-ons, Firefox Add-ons), "Sign in with GitHub" instead of a token, organization repos, a Re-run button.
+- **Next:** store listings (Chrome Web Store, Edge Add-ons, Firefox Add-ons).
+- **Later:** "Sign in with GitHub" instead of a token, organization repos, a Re-run button.
 
 ## License
 

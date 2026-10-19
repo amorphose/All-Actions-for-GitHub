@@ -12,6 +12,10 @@
   <main class="page">
     <section class="setup">
       <h1 id="heading">Connect your GitHub account</h1>
+      <div class="notice" id="access" hidden>
+        <p><b>Allow access to GitHub.</b> Your browser hasn't let the extension work on github.com yet, so the Actions button and the All actions page can't appear.</p>
+        <p><button class="btn primary" type="button" id="access-grant">Allow access</button></p>
+      </div>
       <p class="muted">The extension reads your workflow runs with a read-only token. The token stays in this browser and is only sent to api.github.com.</p>
 
       <ol class="steps">

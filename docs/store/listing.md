@@ -4,7 +4,7 @@ Text and images to paste into the Microsoft Edge Add-ons, Chrome Web Store and F
 
 ## Package
 
-Upload `all-actions-for-github.zip` from the [latest release](https://github.com/amorphose/All-Actions-for-GitHub/releases/latest).
+Upload `all-actions-for-github.zip` to the Chrome Web Store and `all-actions-for-github-firefox.zip` to Firefox Add-ons. Both are on the [latest release](https://github.com/amorphose/All-Actions-for-GitHub/releases/latest).
 
 ## Basics
 
@@ -27,7 +27,7 @@ An Actions entry appears in GitHub's header and menu, between Issues and Pull re
 • The latest run and a strip of the last 10 runs for every workflow, each linking to GitHub.
 • Filters for failed, didn't run, running and passed, plus a search box.
 • Checks in the background every 30 minutes. The toolbar icon and a dot on GitHub's header show when something needs attention.
-• Optional desktop notifications, off by default.
+• Optional desktop notifications when a workflow fails or doesn't run, and separately when one passes. Both off by default.
 • Follows your GitHub light or dark theme.
 
 Private by design: there's no server and no analytics. The extension talks only to GitHub's API, using a read-only fine-grained token you create during setup. The token stays in your browser.
@@ -52,7 +52,7 @@ Chrome asks for these; Edge reviewers read them in the notes.
 - **Single purpose:** Show the status of GitHub Actions workflow runs across all of the user's repositories on one page.
 - **storage:** Keeps the user's GitHub token, settings and the latest results in the browser.
 - **alarms:** Checks GitHub for new workflow results every 30 minutes.
-- **notifications (optional):** Tells the user when a workflow fails or doesn't run. Off by default; the browser asks first.
+- **notifications (optional):** Tells the user when a workflow fails or doesn't run and, if they choose, when one passes. Off by default; the browser asks first.
 - **Host permission api.github.com:** Reads repositories, workflows, workflow runs and workflow files through GitHub's REST API with the user's token.
 - **Content script on github.com:** Adds the Actions entry to GitHub's header and menu, and shows the All actions page at github.com/?all-actions.
 - **Remote code:** None. All code ships in the package.

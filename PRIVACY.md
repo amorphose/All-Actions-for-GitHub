@@ -10,7 +10,7 @@ Everything below is kept in the extension's own storage in your browser profile 
 
 - **Your GitHub token**, which you paste in during setup.
 - **Your GitHub username**, to show which account is connected.
-- **Your settings**: whether to watch scheduled workflows only, and whether desktop notifications are on.
+- **Your settings**: whether to watch scheduled workflows only, how late a scheduled run can be before it counts as missed, and which desktop notifications are on.
 - **The latest results**: names of your repositories and workflows, recent run results, and the schedules read from your workflow files. These are kept so the page opens instantly and can show what changed.
 
 Clicking **Disconnect** in the extension's settings deletes the token, username and results. Removing the extension deletes everything.
@@ -31,7 +31,7 @@ The extension also runs on `github.com` pages to add the **Actions** entry to Gi
 
 - **Storage**: to keep the token, settings and latest results described above.
 - **Alarms**: to check for new results every 30 minutes.
-- **Notifications** (optional, off by default): to tell you when a workflow fails or doesn't run. The browser asks you before turning it on.
+- **Notifications** (optional, off by default): to tell you when a workflow fails or doesn't run and, if you choose, when one passes. The browser asks you before turning it on.
 - **Access to api.github.com and github.com**: to read your workflow runs and to show the Actions entry and page on GitHub.
 
 The token you create can only read. It can't change your code, settings or workflows.

@@ -1,12 +1,14 @@
 name: Release
 
 # Builds the extension zip and publishes it as a GitHub release named after "version"
-# in manifest.json. Start it from the Actions tab (Release → Run workflow), or push a
-# matching tag such as v0.4.0.
+# in manifest.json. It runs on its own when a merge to main changes that version (a merge
+# that leaves the version alone does nothing). It can also be started from the Actions
+# tab (Release → Run workflow), or by pushing a matching tag such as v0.4.0.
 on:
-  workflow_dispatch:
   push:
+    branches: [main]
     tags: ["v*"]
+  workflow_dispatch:
 
 permissions:
   contents: write
@@ -23,24 +25,41 @@ jobs:
         with:
           node-version: 22
 
-      - run: npm test
-
       - name: Work out the version
         run: |
           tag="v$(node -p 'require("./manifest.json").version')"
-          if [ "$GITHUB_EVENT_NAME" = push ] && [ "$GITHUB_REF_NAME" != "$tag" ]; then
+          if [ "$GITHUB_REF_TYPE" = tag ] && [ "$GITHUB_REF_NAME" != "$tag" ]; then
             echo "::error::Tag $GITHUB_REF_NAME doesn't match manifest.json version ${tag#v}"
             exit 1
           fi
           echo "TAG=$tag" >> "$GITHUB_ENV"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            if [ "$GITHUB_EVENT_NAME" = workflow_dispatch ]; then
+              echo "::error::$tag is already released. Bump the version in manifest.json and package.json first."
+              exit 1
+            fi
+            echo "$tag is already released, so there's nothing to publish."
+            echo "SKIP=1" >> "$GITHUB_ENV"
+          fi
+        env:
+          GH_TOKEN: ${{ github.token }}
 
-      - run: npm run package
+      - if: env.SKIP != '1'
+        run: npm test
+
+      - if: env.SKIP != '1'
+        run: npm run package
 
       - name: Write release notes
+        if: env.SKIP != '1'
         run: |
           previous=$(git tag --merged HEAD --sort=-v:refname | grep -vx "$TAG" | head -n 1)
           {
-            echo "Download **all-actions-for-github.zip** below. To install, unzip it and load the folder from your browser's extensions page (Developer mode → Load unpacked). To update, unzip it over your existing folder, replacing the files, and click reload on the extension's card. See the [README](https://github.com/$GITHUB_REPOSITORY#install) for details."
+            echo "**Chrome, Edge and other Chromium browsers:** download **all-actions-for-github.zip** below, unzip it and load the folder from your browser's extensions page (Developer mode → Load unpacked). To update, unzip it over your existing folder, replacing the files, and click reload on the extension's card."
+            echo
+            echo "**Firefox:** download **all-actions-for-github-firefox.zip** and load it from about:debugging → This Firefox → Load Temporary Add-on."
+            echo
+            echo "See the [README](https://github.com/$GITHUB_REPOSITORY#install) for details."
             echo
             echo "## Changes"
             git log --format='- %s' ${previous:+"$previous..HEAD"}
@@ -48,6 +67,7 @@ jobs:
           cat notes.md
 
       - name: Publish the release
+        if: env.SKIP != '1'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$TAG" all-actions-for-github.zip --target "$GITHUB_SHA" --title "${TAG#v}" --notes-file notes.md
+        run: gh release create "$TAG" all-actions-for-github.zip all-actions-for-github-firefox.zip --target "$GITHUB_SHA" --title "${TAG#v}" --notes-file notes.md

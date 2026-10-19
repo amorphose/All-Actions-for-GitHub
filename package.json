@@ -1,12 +1,12 @@
 {
   "name": "all-actions-for-github",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "private": true,
   "description": "Browser extension that adds an account-wide All actions view to GitHub.",
   "type": "module",
   "license": "MIT",
   "scripts": {
     "test": "node --test",
-    "package": "rm -f all-actions-for-github.zip && zip -r -X all-actions-for-github.zip manifest.json icons src LICENSE README.md"
+    "package": "node scripts/package.mjs"
   }
 }
