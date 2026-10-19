@@ -35,7 +35,7 @@ It follows your GitHub theme. Here's every workflow in dark mode:
 
 Firefox only keeps add-ons that Mozilla has signed, so until the extension is on Firefox Add-ons, you can try it as a temporary add-on:
 
-1. Download **all-actions-for-github.zip** from the [latest release](https://github.com/amorphose/All-Actions-for-GitHub/releases/latest).
+1. Download **all-actions-for-github-firefox.zip** from the [latest release](https://github.com/amorphose/All-Actions-for-GitHub/releases/latest). (The other zip is for Chrome and Edge.)
 2. Open `about:debugging`, choose **This Firefox**, and click **Load Temporary Add-on**.
 3. Pick the zip (or `manifest.json` from the unzipped folder).
 4. If the setup page shows **Allow access to GitHub**, click **Allow access**. Firefox can leave the extension switched off on github.com until you agree.

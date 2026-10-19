@@ -7,6 +7,6 @@
   "license": "MIT",
   "scripts": {
     "test": "node --test",
-    "package": "rm -f all-actions-for-github.zip && zip -r -X all-actions-for-github.zip manifest.json icons src LICENSE README.md"
+    "package": "node scripts/package.mjs"
   }
 }

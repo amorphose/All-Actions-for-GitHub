@@ -4,7 +4,7 @@ Text and images to paste into the Microsoft Edge Add-ons, Chrome Web Store and F
 
 ## Package
 
-Upload `all-actions-for-github.zip` from the [latest release](https://github.com/amorphose/All-Actions-for-GitHub/releases/latest).
+Upload `all-actions-for-github.zip` to the Chrome Web Store and `all-actions-for-github-firefox.zip` to Firefox Add-ons. Both are on the [latest release](https://github.com/amorphose/All-Actions-for-GitHub/releases/latest).
 
 ## Basics
 

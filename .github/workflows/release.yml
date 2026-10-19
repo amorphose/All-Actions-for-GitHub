@@ -55,7 +55,11 @@ jobs:
         run: |
           previous=$(git tag --merged HEAD --sort=-v:refname | grep -vx "$TAG" | head -n 1)
           {
-            echo "Download **all-actions-for-github.zip** below. To install in Chrome or Edge, unzip it and load the folder from your browser's extensions page (Developer mode → Load unpacked). To update, unzip it over your existing folder, replacing the files, and click reload on the extension's card. In Firefox, load the zip from about:debugging → This Firefox → Load Temporary Add-on. See the [README](https://github.com/$GITHUB_REPOSITORY#install) for details."
+            echo "**Chrome, Edge and other Chromium browsers:** download **all-actions-for-github.zip** below, unzip it and load the folder from your browser's extensions page (Developer mode → Load unpacked). To update, unzip it over your existing folder, replacing the files, and click reload on the extension's card."
+            echo
+            echo "**Firefox:** download **all-actions-for-github-firefox.zip** and load it from about:debugging → This Firefox → Load Temporary Add-on."
+            echo
+            echo "See the [README](https://github.com/$GITHUB_REPOSITORY#install) for details."
             echo
             echo "## Changes"
             git log --format='- %s' ${previous:+"$previous..HEAD"}
@@ -66,4 +70,4 @@ jobs:
         if: env.SKIP != '1'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$TAG" all-actions-for-github.zip --target "$GITHUB_SHA" --title "${TAG#v}" --notes-file notes.md
+        run: gh release create "$TAG" all-actions-for-github.zip all-actions-for-github-firefox.zip --target "$GITHUB_SHA" --title "${TAG#v}" --notes-file notes.md
