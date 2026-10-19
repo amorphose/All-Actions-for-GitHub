@@ -23,7 +23,7 @@ It follows your GitHub theme. Here's every workflow in dark mode:
 
 ## Install
 
-1. Download **all-actions-for-github.zip** from the [latest release](https://github.com/amorphose/All-Actions-for-GitHub/releases/latest) and unzip it somewhere you'll keep it. (Or `git clone` this repository.)
+1. Download **all-actions-for-github.zip** from the [latest release](https://github.com/amorphose/All-Actions-for-GitHub/releases/latest) and unzip it somewhere you'll keep it.
 2. Open your browser's extensions page:
    - Chrome / Brave: `chrome://extensions`
    - Edge: `edge://extensions`
@@ -40,13 +40,13 @@ Firefox only keeps add-ons that Mozilla has signed, so until the extension is on
 3. Pick the zip (or `manifest.json` from the unzipped folder).
 4. If the setup page shows **Allow access to GitHub**, click **Allow access**. Firefox can leave the extension switched off on github.com until you agree.
 
-A temporary add-on is removed when Firefox closes, along with its token and settings.
+Firefox removes a temporary add-on when it closes, so load it again after you restart Firefox. Your token and settings are kept. To update, load the newer zip the same way.
 
 ### Updating
 
 Your token and settings are kept when you update, so setup is a one-time step.
 
-1. Get the new files **into the same folder**: unzip the new release over the old folder, replacing the files (or `git pull`).
+1. Get the new files **into the same folder**: unzip the new release over the old folder, replacing the files.
 2. On the extensions page, click the reload icon on the extension's card.
 3. Refresh any open GitHub tabs.
 
