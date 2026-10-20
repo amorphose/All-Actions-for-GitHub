@@ -16,22 +16,62 @@
         <p><b>Allow access to GitHub.</b> Your browser hasn't let the extension work on github.com yet, so the Actions button and the All actions page can't appear.</p>
         <p><button class="btn primary" type="button" id="access-grant">Allow access</button></p>
       </div>
-      <p class="muted">The extension reads your workflow runs with a read-only token. The token stays in this browser and is only sent to api.github.com.</p>
-
       <ol class="steps">
         <li>
-          <b>Create a read-only token</b>
-          <p class="muted">This opens GitHub with the name and two read-only permissions filled in: <code>Actions: Read</code> to see your runs, and <code>Contents: Read</code> to read each workflow's schedule so the extension can tell when one didn't run. Under “Repository access”, choose <b>All repositories</b> or just the ones you want watched, then click <b>Generate token</b>.</p>
-          <p class="muted">Already connected with an older token? You don't need a new one. <a href="https://github.com/settings/personal-access-tokens" target="_blank" rel="noopener">Edit it on GitHub ↗</a>, add <b>Contents: Read</b> under Repository permissions, and save. The token itself stays the same.</p>
-          <p><a class="btn" id="token-link" target="_blank" rel="noopener">Open GitHub's token page ↗</a></p>
+          <b id="step1-title">Choose how to connect</b>
+          <div class="choices" id="choices">
+            <div class="choice" id="choice-app">
+              <h2>Sign in with GitHub <span class="pill">Recommended</span></h2>
+              <p class="muted">Approve read-only access on GitHub by entering a code, then pick which repositories to watch. No token to create or renew.</p>
+              <p><button class="btn primary big" type="button" id="signin"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>Sign in with GitHub</button></p>
+            </div>
+            <div class="choice">
+              <h2>Use a read-only token</h2>
+              <p class="muted">Opens GitHub with the name and two read-only permissions filled in: <code>Actions: Read</code> to see your runs, and <code>Contents: Read</code> to read each workflow's schedule so the extension can tell when one didn't run. Choose your repositories and click <b>Generate token</b>.</p>
+              <p><a class="btn" id="token-link" target="_blank" rel="noopener">Open GitHub's token page ↗</a></p>
+            </div>
+          </div>
+          <div id="account" hidden>
+            <div class="acct">
+              <img class="avatar" id="avatar" alt="" width="32" height="32" hidden>
+              <span class="avatar initial" id="avatar-initial" aria-hidden="true"></span>
+              <div><b id="account-login"></b><div class="muted small" id="account-method"></div></div>
+            </div>
+            <div id="replace" class="connect" hidden>
+              <p class="muted small">Paste a new token to replace it, or disconnect below and sign in with GitHub instead.</p>
+              <form class="tokenrow" data-token-form>
+                <label class="sr-only" for="replace-input">New GitHub token</label>
+                <input id="replace-input" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…">
+                <button class="btn primary" type="submit">Replace</button>
+              </form>
+            </div>
+          </div>
         </li>
         <li>
-          <b>Paste it here</b>
-          <form id="token-form" class="tokenrow">
-            <label class="sr-only" for="token-input">GitHub token</label>
-            <input id="token-input" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…">
-            <button class="btn primary" type="submit" id="token-save">Connect</button>
-          </form>
+          <b id="step2-title">Finish connecting</b>
+          <div id="paste" class="connect">
+            <p class="muted">Made a token? Paste it here.</p>
+            <form id="token-form" class="tokenrow" data-token-form>
+              <label class="sr-only" for="token-input">GitHub token</label>
+              <input id="token-input" type="password" autocomplete="off" spellcheck="false" placeholder="github_pat_…">
+              <button class="btn primary" type="submit">Connect</button>
+            </form>
+          </div>
+          <div id="device" class="devicebox" hidden>
+            <p>Enter this code on GitHub to approve the sign-in. The button below copies it for you.</p>
+            <div class="coderow"><span class="code" id="user-code"></span><button class="btn" type="button" id="copy-code">Copy</button></div>
+            <p><a class="btn primary" id="device-link" target="_blank" rel="noopener">Open github.com/login/device ↗</a></p>
+            <p class="muted small"><span class="spinner" aria-hidden="true"></span>Waiting for you to approve on GitHub… <button class="btn link" type="button" id="cancel-signin">Cancel</button></p>
+          </div>
+          <div id="install" class="notice" hidden>
+            <p><b>Now choose your repositories.</b> Pick <b>All repositories</b> or just the ones you want watched, then come back here.</p>
+            <p><a class="btn primary" id="install-link" target="_blank" rel="noopener">Choose repositories on GitHub ↗</a></p>
+          </div>
+          <div id="repos" class="connect" hidden>
+            <p class="muted" id="repo-count"></p>
+            <p class="muted small" id="contents-note" hidden>This token can't read workflow files, so workflows that didn't run can't be spotted. Edit it on GitHub and add <b>Contents: Read</b> under Repository permissions. The token itself stays the same.</p>
+            <p><a class="btn" id="repos-link" target="_blank" rel="noopener"></a></p>
+          </div>
           <p id="token-status" class="status" role="status"></p>
         </li>
         <li>

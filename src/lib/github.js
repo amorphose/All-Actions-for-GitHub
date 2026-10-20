@@ -76,6 +76,12 @@ export async function getUser(token) {
   return (await request(token, "/user")).data;
 }
 
+/** Where the extension's GitHub App is installed, for someone who signed in with it. */
+export async function listInstallations(token) {
+  const { data } = await request(token, "/user/installations", { per_page: 100 });
+  return data.installations ?? [];
+}
+
 /** Repositories the token can see that you own, skipping archived ones (they can't run workflows). */
 export async function listRepos(token, http = null) {
   const keep = (list) =>
