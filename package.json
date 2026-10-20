@@ -1,6 +1,6 @@
 {
   "name": "all-actions-for-github",
-  "version": "0.9.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Browser extension that adds an account-wide All actions view to GitHub.",
   "type": "module",

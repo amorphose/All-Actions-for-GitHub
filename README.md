@@ -13,7 +13,7 @@ A browser extension that adds an account-wide **All actions** view to GitHub, ne
 - Optional desktop notifications when a workflow fails or doesn't run, and separately when one passes (both off by default).
 - It runs entirely in your browser. There's no server: it talks to GitHub directly, with read-only access you give it by signing in with GitHub or with a token you create.
 
-> Status: early version, before 1.0. Works in Chrome, Edge, Brave and other Chromium browsers, and in Firefox 140 or later.
+> Version 1.0. Works in Chrome, Edge, Brave and other Chromium browsers, and in Firefox 140 or later.
 
 It follows your GitHub theme. Here's every workflow in dark mode:
 
@@ -22,6 +22,8 @@ It follows your GitHub theme. Here's every workflow in dark mode:
 <sub>Screenshots use made-up demo data.</sub>
 
 ## Install
+
+Listings on the Chrome Web Store and Firefox Add-ons are on the way. Edge users will install from the Chrome Web Store: Edge allows that once you turn on **Allow extensions from other stores** when it asks. Until the listings are up, install from the latest release:
 
 1. Download **all-actions-for-github.zip** from the [latest release](https://github.com/amorphose/All-Actions-for-GitHub/releases/latest) and unzip it somewhere you'll keep it.
 2. Open your browser's extensions page:
@@ -104,7 +106,7 @@ GitHub runs schedules in UTC and often starts them hours late at busy times, so 
 
 ## Roadmap
 
-- **Next:** store listings (Chrome Web Store, Edge Add-ons, Firefox Add-ons).
+- **Next:** listings on the Chrome Web Store and Firefox Add-ons. Edge users will install from the Chrome Web Store.
 - **Later:** organization repos, a Re-run button.
 
 ## License
