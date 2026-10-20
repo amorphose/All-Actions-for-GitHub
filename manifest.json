@@ -30,7 +30,8 @@
     "alarms"
   ],
   "host_permissions": [
-    "https://api.github.com/*"
+    "https://api.github.com/*",
+    "https://github.com/login/*"
   ],
   "content_scripts": [
     {

@@ -1,6 +1,7 @@
-import { getUser, TokenError } from "./lib/github.js";
+import { getUser, listInstallations, TokenError } from "./lib/github.js";
+import { requestDeviceCode, pollForToken, toAuth, SignInError, INSTALL_URL } from "./lib/auth.js";
 import {
-  getToken, setToken, clearToken, getLogin, setLogin, getSettings, setSettings, updateBadge,
+  getToken, setToken, clearToken, getAuth, getLogin, setLogin, getAvatar, getSettings, setSettings, getSnapshot, updateBadge,
 } from "./lib/storage.js";
 import { MISSED_AFTER_HOURS } from "./lib/runs.js";
 
@@ -16,6 +17,8 @@ const TOKEN_URL =
   });
 
 const REPO_URL = "https://github.com/amorphose/All-Actions-for-GitHub";
+const TOKENS_URL = "https://github.com/settings/personal-access-tokens";
+const INSTALL_CHECK_MS = 5000;
 
 // Chrome and Edge grant these at install. Firefox can leave them for the person to allow.
 const SITE_ACCESS = { origins: ["https://github.com/*", "https://api.github.com/*"] };
@@ -50,32 +53,152 @@ function setStatus(text, kind = "") {
   $("token-status").className = `status ${kind}`;
 }
 
+/** The current token from the background script, which renews it when needed. */
+async function currentToken() {
+  const res = await chrome.runtime.sendMessage({ type: "get-token" });
+  if (res?.error) throw new TokenError(res.error);
+  return res?.token || "";
+}
+
+let signIn = null; // AbortController while waiting for the person to approve on GitHub
+let installation = null; // { id } once the app is installed on the person's account
+let installTimer = null;
+let waitingForInstall = false;
+
+/** Show one of: the two ways to connect, the sign-in code, or the connected account and its repositories. */
 async function showConnected() {
-  const [token, login] = await Promise.all([getToken(), getLogin()]);
-  $("disconnect").hidden = !token;
+  const [token, auth, login, avatar] = await Promise.all([getToken(), getAuth(), getLogin(), getAvatar()]);
+  const app = auth?.method === "app";
+  const signingIn = Boolean(signIn) && !token;
   $("heading").textContent = token ? "Settings" : "Connect your GitHub account";
-  if (token) setStatus(`Connected as @${login}. Paste a new token to replace it.`, "ok");
+  $("disconnect").hidden = !token;
+  $("step1-title").textContent = token ? "GitHub account" : "Choose how to connect";
+  $("step2-title").textContent = token ? "Repositories" : "Finish connecting";
+  $("choices").hidden = Boolean(token);
+  $("choice-app").classList.toggle("picked", signingIn);
+  $("account").hidden = !token;
+  $("replace").hidden = !token || app;
+  $("paste").hidden = Boolean(token) || signingIn;
+  $("device").hidden = !signingIn;
+  if (token) {
+    $("account-login").textContent = `@${login}`;
+    $("account-method").textContent = app ? "Signed in with GitHub" : "Connected with a token";
+    $("avatar").hidden = !avatar;
+    if (avatar) $("avatar").src = avatar;
+    $("avatar-initial").hidden = Boolean(avatar);
+    $("avatar-initial").textContent = login.slice(0, 1).toUpperCase();
+  }
+  if (!token || !app) installation = null;
+  await showRepos(token, app, login);
+}
+
+async function showRepos(token, app, login) {
+  clearTimeout(installTimer);
+  const needsInstall = token && app && !installation && !(await findInstallation(login));
+  $("install").hidden = !needsInstall;
+  $("repos").hidden = !token || needsInstall;
+  if (needsInstall) {
+    waitingForInstall = true;
+    // Check again shortly, so the page moves on by itself once the person comes back from GitHub.
+    installTimer = setTimeout(showConnected, INSTALL_CHECK_MS);
+    return;
+  }
+  if (!token) return;
+  const snapshot = await getSnapshot();
+  const n = snapshot?.repoCount;
+  $("repo-count").textContent = snapshot?.fetchedAt
+    ? `Watching ${n} ${n === 1 ? "repository" : "repositories"}.`
+    : "Checking your repositories…";
+  $("contents-note").hidden = app || snapshot?.scheduleAccess !== "denied";
+  $("repos-link").textContent = app ? "Change repositories on GitHub ↗" : "Change the token's repositories on GitHub ↗";
+  $("repos-link").href = !app ? TOKENS_URL
+    : installation?.id ? `https://github.com/settings/installations/${installation.id}` : "https://github.com/settings/installations";
+}
+
+/** Whether the app is installed on the person's own account. Remembers the installation once found. */
+async function findInstallation(login) {
+  try {
+    const all = await listInstallations(await currentToken());
+    const mine = all.find((i) => i.account?.login?.toLowerCase() === login.toLowerCase());
+    if (mine && waitingForInstall) {
+      waitingForInstall = false;
+      chrome.runtime.sendMessage({ type: "refresh" }).catch(() => {}); // the newly chosen repositories
+    }
+    installation = mine ? { id: mine.id } : null;
+  } catch (err) {
+    // Can't tell right now (offline, or the sign-in expired): don't nag about installing.
+    installation = { id: "" };
+    if (err instanceof TokenError) setStatus(err.message, "err");
+  }
+  return installation;
+}
+
+async function onSignIn() {
+  $("signin").disabled = true;
+  setStatus("Asking GitHub for a code…");
+  const controller = new AbortController();
+  try {
+    const code = await requestDeviceCode();
+    signIn = controller;
+    $("user-code").textContent = code.user_code;
+    $("device-link").href = code.verification_uri;
+    setStatus("");
+    await showConnected();
+    const data = await pollForToken(code, { signal: controller.signal });
+    setStatus("Finishing sign-in…");
+    const user = await getUser(data.access_token);
+    // Results from a previous connection may belong to another account.
+    await chrome.storage.local.remove(["snapshot", "scheduleCache", "httpCache"]);
+    await chrome.storage.local.set({ token: data.access_token, auth: toAuth(data) });
+    await setLogin(user.login, user.avatar_url);
+    await updateBadge(null);
+    signIn = null;
+    chrome.runtime.sendMessage({ type: "refresh" }).catch(() => {});
+    await showConnected();
+    setStatus(`Signed in as @${user.login}.`, "ok");
+  } catch (err) {
+    if (signIn === controller) signIn = null;
+    await showConnected();
+    if (err instanceof SignInError && err.code === "cancelled") setStatus("");
+    else setStatus(err instanceof SignInError ? err.message : `Couldn't reach GitHub: ${err.message}`, "err");
+  } finally {
+    $("signin").disabled = false;
+  }
+}
+
+function onCancelSignIn() {
+  signIn?.abort();
+}
+
+/** Copy the sign-in code. Runs straight from a click, which browsers require for writing to the clipboard. */
+function copyCode() {
+  navigator.clipboard.writeText($("user-code").textContent).catch(() => {});
 }
 
 async function onTokenSubmit(e) {
   e.preventDefault();
-  const token = $("token-input").value.trim();
+  const form = e.currentTarget;
+  const input = form.querySelector("input");
+  const button = form.querySelector("button");
+  const token = input.value.trim();
   if (!token) {
     setStatus("Paste the token GitHub showed you after you generated it.", "err");
     return;
   }
-  $("token-save").disabled = true;
+  button.disabled = true;
   setStatus("Checking the token with GitHub…");
   try {
     const user = await getUser(token);
     await setToken(token);
-    await setLogin(user.login);
+    await chrome.storage.local.remove("auth");
+    await setLogin(user.login, user.avatar_url);
     // Results from a previous token may belong to another account.
     await chrome.storage.local.remove("snapshot");
     await updateBadge(null);
-    $("token-input").value = "";
+    input.value = "";
     await showConnected();
     setStatus(`Connected as @${user.login}.`, "ok");
+    chrome.runtime.sendMessage({ type: "refresh" }).catch(() => {});
   } catch (err) {
     setStatus(
       err instanceof TokenError
@@ -84,7 +207,7 @@ async function onTokenSubmit(e) {
       "err",
     );
   } finally {
-    $("token-save").disabled = false;
+    button.disabled = false;
   }
 }
 
@@ -122,17 +245,24 @@ async function onNotifyChange(e) {
 
 async function onDone() {
   if (!(await getToken())) {
-    setStatus("Connect a token first (step 2).", "err");
+    setStatus("Connect your GitHub account first (step 1).", "err");
     return;
   }
   location.href = VIEW_URL;
 }
 
 async function onDisconnect() {
+  const app = (await getAuth())?.method === "app";
   await clearToken();
   await updateBadge(null);
-  $("token-input").value = "";
-  setStatus("Disconnected. The token was removed from this browser. You can also delete it on GitHub.");
+  installation = null;
+  waitingForInstall = false;
+  for (const input of document.querySelectorAll("[data-token-form] input")) input.value = "";
+  setStatus(
+    app
+      ? "Signed out. To take away the app's access too, uninstall it on GitHub under Settings, Applications."
+      : "Disconnected. The token was removed from this browser. You can also delete it on GitHub.",
+  );
   await showConnected();
 }
 
@@ -152,7 +282,16 @@ async function init() {
   $("notify").addEventListener("change", onNotifyChange);
   $("notify-pass").checked = settings.notifyPass;
   $("notify-pass").addEventListener("change", onNotifyChange);
-  $("token-form").addEventListener("submit", onTokenSubmit);
+  for (const form of document.querySelectorAll("[data-token-form]")) form.addEventListener("submit", onTokenSubmit);
+  $("signin").addEventListener("click", onSignIn);
+  $("cancel-signin").addEventListener("click", onCancelSignIn);
+  $("copy-code").addEventListener("click", copyCode);
+  $("device-link").addEventListener("click", copyCode);
+  $("install-link").href = INSTALL_URL;
+  // Keep the repository count current while the page is open.
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === "local" && changes.snapshot && !signIn) showConnected();
+  });
   $("scope-scheduled").addEventListener("change", onScopeChange);
   $("scope-all").addEventListener("change", onScopeChange);
   $("done").addEventListener("click", onDone);

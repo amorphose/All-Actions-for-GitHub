@@ -134,7 +134,7 @@ export async function mountView(host) {
     ),
   );
 
-  const state = { tab: null, query: "", snapshot: null, refreshState: null, hasToken: false };
+  const state = { tab: null, query: "", snapshot: null, refreshState: null, hasToken: false, signedIn: false };
 
   ui.search.addEventListener("input", () => {
     state.query = ui.search.value;
@@ -161,12 +161,18 @@ export async function mountView(host) {
     let text = "";
     let info = false;
     if (!state.hasToken) text = "";
-    else if (err?.kind === "token") text = "GitHub no longer accepts your token. It has probably expired. Open Settings to paste a new one.";
+    else if (err?.kind === "token") {
+      text = state.signedIn
+        ? "Your GitHub sign-in has expired or was removed. Open Settings to sign in again."
+        : "GitHub no longer accepts your token. It has probably expired. Open Settings to paste a new one.";
+    }
     else if (err?.kind === "rate") text = `GitHub's hourly request limit was reached.${err.resetAt ? ` Try again after ${new Date(err.resetAt).toLocaleTimeString()}.` : ""}`;
     else if (err) text = `Couldn't refresh: ${err.message}`;
     else if (state.snapshot?.scheduleAccess === "denied") {
       info = true;
-      text = "To spot scheduled workflows that didn't run, your token also needs Contents: Read. Open Settings to see how to add it.";
+      text = state.signedIn
+        ? "GitHub didn't let the extension read your workflow files, so workflows that didn't run can't be spotted."
+        : "To spot scheduled workflows that didn't run, your token also needs Contents: Read. Open Settings to see how to add it.";
     }
     ui.banner.textContent = text;
     ui.banner.classList.toggle("info", info);
@@ -241,9 +247,8 @@ export async function mountView(host) {
         el(
           "div",
           { class: "empty-state" },
-          s.scheduledOnly
-            ? "No scheduled workflow runs in the last 14 days in the repositories this token can see."
-            : "No workflow runs in the last 14 days in the repositories this token can see.",
+          `${s.scheduledOnly ? "No scheduled workflow runs" : "No workflow runs"} in the last 14 days in the repositories ${
+            state.signedIn ? "you chose" : "this token can see"}.`,
         ),
       );
     } else if (!shown.length) {
@@ -274,10 +279,11 @@ export async function mountView(host) {
     }
   }
 
-  const stored = await chrome.storage.local.get(["snapshot", "refreshState", "token"]);
+  const stored = await chrome.storage.local.get(["snapshot", "refreshState", "token", "auth"]);
   state.snapshot = stored.snapshot?.fetchedAt ? stored.snapshot : null;
   state.refreshState = stored.refreshState || null;
   state.hasToken = Boolean(stored.token);
+  state.signedIn = stored.auth?.method === "app";
   render();
 
   const onChange = (changes, area) => {
@@ -285,6 +291,7 @@ export async function mountView(host) {
     if (changes.snapshot) state.snapshot = changes.snapshot.newValue?.fetchedAt ? changes.snapshot.newValue : null;
     if (changes.refreshState) state.refreshState = changes.refreshState.newValue || null;
     if (changes.token) state.hasToken = Boolean(changes.token.newValue);
+    if (changes.auth) state.signedIn = changes.auth.newValue?.method === "app";
     if (changes.snapshot || changes.refreshState || changes.token) render();
   };
   chrome.storage.onChanged.addListener(onChange);

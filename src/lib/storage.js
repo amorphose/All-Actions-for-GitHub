@@ -11,8 +11,14 @@ export async function setToken(token) {
   await chrome.storage.local.set({ token });
 }
 
+/** How the extension is connected: `{ method: "app", ... }` after Sign in with GitHub, or null for a pasted token. */
+export async function getAuth() {
+  const { auth } = await chrome.storage.local.get("auth");
+  return auth || null;
+}
+
 export async function clearToken() {
-  await chrome.storage.local.remove(["token", "login", "snapshot", "scheduleCache", "httpCache"]);
+  await chrome.storage.local.remove(["token", "auth", "login", "avatar", "snapshot", "scheduleCache", "httpCache"]);
 }
 
 export async function getLogin() {
@@ -20,8 +26,13 @@ export async function getLogin() {
   return login || "";
 }
 
-export async function setLogin(login) {
-  await chrome.storage.local.set({ login });
+export async function setLogin(login, avatar = "") {
+  await chrome.storage.local.set({ login, avatar });
+}
+
+export async function getAvatar() {
+  const { avatar } = await chrome.storage.local.get("avatar");
+  return avatar || "";
 }
 
 export async function getSettings() {

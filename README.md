@@ -11,7 +11,7 @@ A browser extension that adds an account-wide **All actions** view to GitHub, ne
 - Each row shows the schedule in plain words in your own time zone with the UTC time GitHub uses alongside ("Daily at 04:05 (08:05 UTC)"), the latest run, and a strip of the last 10 runs. Click anything to open it on GitHub.
 - It checks again in the background every 30 minutes, and the toolbar icon shows how many workflows need attention.
 - Optional desktop notifications when a workflow fails or doesn't run, and separately when one passes (both off by default).
-- It runs entirely in your browser. There's no server: it talks to GitHub's API directly with your own read-only token.
+- It runs entirely in your browser. There's no server: it talks to GitHub directly, with read-only access you give it by signing in with GitHub or with a token you create.
 
 > Status: early version, before 1.0. Works in Chrome, Edge, Brave and other Chromium browsers, and in Firefox 140 or later.
 
@@ -40,36 +40,47 @@ Firefox only keeps add-ons that Mozilla has signed, so until the extension is on
 3. Pick the zip (or `manifest.json` from the unzipped folder).
 4. If the setup page shows **Allow access to GitHub**, click **Allow access**. Firefox can leave the extension switched off on github.com until you agree.
 
-Firefox removes a temporary add-on when it closes, so load it again after you restart Firefox. Your token and settings are kept. To update, load the newer zip the same way.
+Firefox removes a temporary add-on when it closes, so load it again after you restart Firefox. Your connection and settings are kept. To update, load the newer zip the same way.
 
 ### Updating
 
-Your token and settings are kept when you update, so setup is a one-time step.
+Your connection and settings are kept when you update, so setup is a one-time step.
 
 1. Get the new files **into the same folder**: unzip the new release over the old folder, replacing the files.
 2. On the extensions page, click the reload icon on the extension's card.
 3. Refresh any open GitHub tabs.
 
-Loading a copy from a *different* folder counts as a new extension, and removing the extension deletes its storage. Either one means pasting your token again.
+Loading a copy from a *different* folder counts as a new extension, and removing the extension deletes its storage. Either one means connecting again.
 
 ## Connect your GitHub account
 
-The setup page walks you through this:
+The setup page offers two ways to connect. Both give the extension the same read-only access.
 
-1. **Open GitHub's token page.** The link pre-fills a fine-grained token named "All Actions for GitHub" with a 90-day expiry and two read-only permissions:
+### Sign in with GitHub (recommended)
+
+1. Click **Sign in with GitHub**. The setup page shows a code.
+2. Click **Open github.com/login/device** (this also copies the code), paste the code, and click **Authorize** on the page that lists the app's read-only permissions.
+3. The first time, the setup page asks you to **choose your repositories**. That opens GitHub, where you install the [All Actions for GitHub app](https://github.com/apps/all-actions-for-github) on **All repositories** or only the ones you want watched. Come back and the page moves on by itself.
+
+There's nothing to renew: GitHub's sign-in lasts 8 hours at a time, and the extension renews it in the background for as long as you use it (GitHub asks you to sign in again only after 6 months without the extension running). To change which repositories it watches later, use **Change repositories on GitHub** under step 2 in Settings.
+
+### Use a read-only token
+
+1. Click **Open GitHub's token page**. The link pre-fills a fine-grained token named "All Actions for GitHub" with a 90-day expiry and two read-only permissions:
    - **Actions: Read** to see workflow runs.
    - **Contents: Read** to read each workflow file's `schedule:` so the extension can tell when a run is missing. Without it everything else still works; you just won't see "didn't run" warnings.
 2. Under **Repository access**, choose **All repositories**, or only the repos you want watched. Then click **Generate token**.
-3. Copy the token and paste it into the setup page, then click **Connect**.
-4. Choose whether to watch **scheduled workflows only** (the default) or **every workflow run**, optionally shorten how late a scheduled run can be before it counts as missed, optionally turn on desktop notifications, and click **Open All actions**.
+3. Copy the token, paste it into the setup page under **Finish connecting**, and click **Connect**.
 
-Upgrading from 0.2 or earlier? Your token keeps working. To get "didn't run" warnings, [edit the token on GitHub](https://github.com/settings/personal-access-tokens), add **Contents: Read** under Repository permissions and save; the token value doesn't change.
+When the token expires, the page tells you, and you can paste a new one under **Settings** (also available by right-clicking the toolbar icon and choosing **Options**). To switch to Sign in with GitHub, click **Disconnect** and sign in.
 
-When the token expires, the page tells you, and you can paste a new one under **Settings** (also available by right-clicking the toolbar icon and choosing **Options**).
+### Then
 
-### What the token can do
+Choose whether to watch **scheduled workflows only** (the default) or **every workflow run**, optionally shorten how late a scheduled run can be before it counts as missed, optionally turn on desktop notifications, and click **Open All actions**.
 
-It can only *read*: workflow runs, repository details (name, visibility) and file contents (used only for workflow files under `.github/workflows/`). It can't change code, settings or workflows. The token is stored in your browser's extension storage and is sent only to `api.github.com`.
+### What it can do
+
+Either way it can only *read*: workflow runs, repository details (name, visibility) and file contents (used only for workflow files under `.github/workflows/`). It can't change code, settings or workflows. The access token is stored in your browser's extension storage and is sent only to GitHub (`api.github.com`, and `github.com/login` to sign in and renew).
 
 See the [privacy policy](PRIVACY.md) for everything the extension stores and sends.
 
@@ -78,7 +89,8 @@ See the [privacy policy](PRIVACY.md) for everything the extension stores and sen
 | Piece | File | What it does |
 |---|---|---|
 | All actions page | `src/view.*` | The list itself, rendered in a shadow root so GitHub's styles and ours don't collide. It uses GitHub's own color variables, so it follows your GitHub theme. |
-| Settings | `src/settings.*` | Token setup, what to watch, the missed-run delay, notifications, and links to report a problem. |
+| Settings | `src/settings.*` | Connecting (sign-in or token), what to watch, the missed-run delay, notifications, and links to report a problem. |
+| Sign in with GitHub | `src/lib/auth.js` | GitHub's [device flow](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-user-access-token-for-a-github-app#using-the-device-flow-to-generate-a-user-access-token) for the extension's GitHub App, and renewing the access token before it expires. Device-flow tokens renew without a client secret, so there's still no server. |
 | GitHub client | `src/lib/github.js` | Lists your repos (`GET /user/repos`), then recent runs per repo (`GET /repos/{owner}/{repo}/actions/runs`). GitHub has no account-wide runs endpoint, so it's one request per repo, six at a time. |
 | Run logic | `src/lib/runs.js`, `src/lib/cron.js` | Groups runs by workflow, classifies them (failed, didn't run, running, passed, cancelled/skipped), works out when each schedule last should have fired, sorts and formats. No browser APIs, so it's unit-tested in Node. |
 | GitHub integration | `src/content.js`, `src/early.js` | Copies GitHub's own Pull requests link, turns it into an Actions link, and inserts it just before Pull requests. On `github.com/?all-actions` it hides the page body and shows the list in its place, under GitHub's real top bar. |
@@ -93,7 +105,7 @@ GitHub runs schedules in UTC and often starts them hours late at busy times, so 
 ## Roadmap
 
 - **Next:** store listings (Chrome Web Store, Edge Add-ons, Firefox Add-ons).
-- **Later:** "Sign in with GitHub" instead of a token, organization repos, a Re-run button.
+- **Later:** organization repos, a Re-run button.
 
 ## License
 

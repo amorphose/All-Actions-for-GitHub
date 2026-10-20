@@ -80,3 +80,25 @@ code { font: 12px ui-monospace, SFMono-Regular, Menlo, monospace; background: va
 .delay-value { font-weight: 600; font-variant-numeric: tabular-nums; }
 .delay input[type="range"] { width: 100%; margin: 4px 0 0; accent-color: var(--accent); }
 .delay-ticks { display: flex; justify-content: space-between; font-size: 12px; color: var(--fg-muted); padding: 0 2px; }
+
+.small { font-size: 13px; }
+.connect { display: grid; gap: 8px; }
+.btn.big { font-size: 14px; padding: 7px 16px; }
+.btn svg { fill: currentColor; }
+.btn.link:not(.danger) { color: var(--accent); font-size: inherit; font-weight: inherit; line-height: inherit; padding: 0; }
+.choices { display: grid; gap: 12px; }
+.choice { border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; display: grid; gap: 8px; align-content: start; }
+.choice.picked { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+.choice h2 { margin: 0; font-size: 14px; font-weight: 600; display: flex; gap: 8px; align-items: center; }
+.choice p { font-size: 13px; }
+.pill { font-size: 11px; font-weight: 500; border: 1px solid var(--ok); color: var(--ok); border-radius: 999px; padding: 0 7px; }
+.acct { display: flex; gap: 10px; align-items: center; }
+.avatar { width: 32px; height: 32px; border-radius: 50%; flex: none; }
+.avatar.initial { background: var(--accent); color: #ffffff; display: grid; place-items: center; font-weight: 600; }
+.devicebox { border: 1px solid var(--border); border-radius: 6px; padding: 14px 16px; background: var(--bg-subtle); display: grid; gap: 10px; }
+.code { font: 600 26px ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: 3px; }
+.coderow { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.spinner { width: 12px; height: 12px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; display: inline-block; vertical-align: -1px; margin-right: 6px; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .spinner { animation: none; } }
+#replace { margin-top: 10px; }

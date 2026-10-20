@@ -1,4 +1,5 @@
 import { loadSnapshot, TokenError, RateLimitError } from "./lib/github.js";
+import { getAccessToken } from "./lib/auth.js";
 import { getToken, getSettings, getSnapshot, setSnapshot, updateBadge } from "./lib/storage.js";
 import { newProblems, newPasses, graceMs } from "./lib/runs.js";
 
@@ -11,13 +12,13 @@ let running = null;
 function refresh() {
   if (running) return running;
   running = (async () => {
-    const token = await getToken();
-    if (!token) return;
+    if (!(await getToken())) return;
     const { scheduledOnly, notify, notifyPass, missedAfterHours } = await getSettings();
     const previous = await getSnapshot();
     const { scheduleCache = {}, httpCache = {} } = await chrome.storage.local.get(["scheduleCache", "httpCache"]);
     await chrome.storage.local.set({ refreshState: { running: true, done: 0, total: 0, at: Date.now() } });
     try {
+      const token = await getAccessToken(); // renews a Sign in with GitHub token when it's due
       const result = await loadSnapshot(token, {
         scheduledOnly,
         grace: graceMs(missedAfterHours),
@@ -90,9 +91,17 @@ chrome.action.onClicked.addListener(() => {
   chrome.tabs.create({ url: VIEW_URL });
 });
 
-chrome.runtime.onMessage.addListener((message) => {
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message?.type === "refresh") refresh();
   if (message?.type === "open-settings") chrome.runtime.openOptionsPage();
+  // Settings asks here rather than renewing the token itself, so only one place ever renews it.
+  if (message?.type === "get-token") {
+    getAccessToken().then(
+      (token) => sendResponse({ token }),
+      (e) => sendResponse({ error: e.message }),
+    );
+    return true; // the answer comes later
+  }
 });
 
 // Check in the background so the badge stays current.
