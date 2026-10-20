@@ -248,7 +248,22 @@
     const stop = await mountView(mine);
     if (host === mine) unmount = stop;
     else stop();
+    clearLoggedOutHeader();
   }
+
+  // Signed out, GitHub's home page header floats over the top of the page, so the list
+  // would start underneath it. Push the list down by however much the header covers,
+  // measured again as GitHub finishes loading. Signed in, there's no such header and
+  // this does nothing.
+  function clearLoggedOutHeader() {
+    const header = document.querySelector("header.header-logged-out");
+    if (!host || !header || window.scrollY > 0) return;
+    host.style.paddingTop = "";
+    const covered = header.getBoundingClientRect().bottom - host.getBoundingClientRect().top;
+    if (covered > 0) host.style.paddingTop = `${Math.ceil(covered)}px`;
+  }
+  window.addEventListener("resize", clearLoggedOutHeader);
+  window.addEventListener("load", clearLoggedOutHeader);
 
   function setFromSnapshot(snapshot) {
     attentionCount = snapshot?.entries
@@ -272,6 +287,7 @@
       queued = false;
       inject();
       syncView();
+      clearLoggedOutHeader();
     });
   }).observe(document.documentElement, { childList: true, subtree: true });
   window.addEventListener("popstate", syncView);

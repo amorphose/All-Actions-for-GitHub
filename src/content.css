@@ -51,3 +51,9 @@
 /* https://github.com/?all-actions: hide GitHub's page body; the list renders in its place. */
 html[data-all-actions-view] .application-main,
 html[data-all-actions-view] body main { display: none !important; }
+
+/* Signed out, GitHub's home page header floats over the page with a see-through background.
+   The list is pushed below it (content.js); this keeps it solid when the list scrolls under. */
+html[data-all-actions-view] header.header-logged-out {
+  background-color: var(--bgColor-default, #0d1117) !important;
+}
