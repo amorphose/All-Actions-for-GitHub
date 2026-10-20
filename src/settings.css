@@ -67,6 +67,7 @@ code { font: 12px ui-monospace, SFMono-Regular, Menlo, monospace; background: va
   padding: 5px 10px; border: 1px solid var(--border); border-radius: 6px; background: var(--bg); color: var(--fg);
 }
 .status { font-size: 13px; min-height: 1.5em; }
+.status:empty { display: none; }
 .status.ok { color: var(--ok); }
 .status.err { color: var(--err); }
 .radio { border: 0; padding: 0; margin: 0; display: grid; gap: 4px; }

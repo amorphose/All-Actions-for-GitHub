@@ -64,6 +64,7 @@ let signIn = null; // AbortController while waiting for the person to approve on
 let installation = null; // { id } once the app is installed on the person's account
 let installTimer = null;
 let waitingForInstall = false;
+let avatarChecked = false;
 
 /** Show one of: the two ways to connect, the sign-in code, or the connected account and its repositories. */
 async function showConnected() {
@@ -87,9 +88,23 @@ async function showConnected() {
     if (avatar) $("avatar").src = avatar;
     $("avatar-initial").hidden = Boolean(avatar);
     $("avatar-initial").textContent = login.slice(0, 1).toUpperCase();
+    if (!avatar && !avatarChecked) addAvatar();
   }
   if (!token || !app) installation = null;
   await showRepos(token, app, login);
+}
+
+/** Connections saved before 1.0 have no profile picture yet: look it up once. */
+async function addAvatar() {
+  avatarChecked = true;
+  try {
+    const user = await getUser(await currentToken());
+    if (!user.avatar_url) return;
+    await setLogin(user.login, user.avatar_url);
+    await showConnected();
+  } catch {
+    // Not important enough to show an error for; the initial stays.
+  }
 }
 
 async function showRepos(token, app, login) {
