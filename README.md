@@ -23,7 +23,26 @@ It follows your GitHub theme. Here's every workflow in dark mode:
 
 ## Install
 
-Listings on the Chrome Web Store and Firefox Add-ons are on the way. Edge users will install from the Chrome Web Store: Edge allows that once you turn on **Allow extensions from other stores** when it asks. Until the listings are up, install from the latest release:
+### Chrome and Edge
+
+Install **[All Actions for GitHub from the Chrome Web Store](https://chromewebstore.google.com/detail/all-actions-for-github/aigbhhpmdngbdikaihcdcobejgnlagod)**. It works in Chrome, Edge, Brave and other Chromium browsers, and updates itself. In Edge, turn on **Allow extensions from other stores** when it asks.
+
+The setup page opens automatically. After setup, open the list from the new Actions icon on GitHub or the extension's toolbar icon.
+
+### Firefox
+
+The Firefox Add-ons listing is waiting for Mozilla's review. Firefox only keeps add-ons that Mozilla has signed, so until then you can try it as a temporary add-on:
+
+1. Download **all-actions-for-github-firefox.zip** from the [latest release](https://github.com/amorphose/All-Actions-for-GitHub/releases/latest). (The other zip is for Chrome and Edge.)
+2. Open `about:debugging`, choose **This Firefox**, and click **Load Temporary Add-on**.
+3. Pick the zip (or `manifest.json` from the unzipped folder).
+4. If the setup page shows **Allow access to GitHub**, click **Allow access**. Firefox can leave the extension switched off on github.com until you agree.
+
+Firefox removes a temporary add-on when it closes, so load it again after you restart Firefox. Your connection and settings are kept. To update, load the newer zip the same way.
+
+### Install from a release instead
+
+You can also load the extension yourself from a release zip in Chrome, Edge and other Chromium browsers. A copy installed this way doesn't update itself.
 
 1. Download **all-actions-for-github.zip** from the [latest release](https://github.com/amorphose/All-Actions-for-GitHub/releases/latest) and unzip it somewhere you'll keep it.
 2. Open your browser's extensions page:
@@ -33,20 +52,9 @@ Listings on the Chrome Web Store and Firefox Add-ons are on the way. Edge users 
 4. Click **Load unpacked** and choose the unzipped folder (the one containing `manifest.json`).
 5. The setup page opens automatically. After setup, open the list from the new Actions icon on GitHub or the extension's toolbar icon.
 
-### Firefox
+#### Updating a copy installed from a release
 
-Firefox only keeps add-ons that Mozilla has signed, so until the extension is on Firefox Add-ons, you can try it as a temporary add-on:
-
-1. Download **all-actions-for-github-firefox.zip** from the [latest release](https://github.com/amorphose/All-Actions-for-GitHub/releases/latest). (The other zip is for Chrome and Edge.)
-2. Open `about:debugging`, choose **This Firefox**, and click **Load Temporary Add-on**.
-3. Pick the zip (or `manifest.json` from the unzipped folder).
-4. If the setup page shows **Allow access to GitHub**, click **Allow access**. Firefox can leave the extension switched off on github.com until you agree.
-
-Firefox removes a temporary add-on when it closes, so load it again after you restart Firefox. Your connection and settings are kept. To update, load the newer zip the same way.
-
-### Updating
-
-Your connection and settings are kept when you update, so setup is a one-time step.
+Store copies update themselves. For a copy you loaded from a release, your connection and settings are kept when you update, so setup is a one-time step.
 
 1. Get the new files **into the same folder**: unzip the new release over the old folder, replacing the files.
 2. On the extensions page, click the reload icon on the extension's card.
@@ -106,7 +114,7 @@ GitHub runs schedules in UTC and often starts them hours late at busy times, so 
 
 ## Roadmap
 
-- **Next:** listings on the Chrome Web Store and Firefox Add-ons. Edge users will install from the Chrome Web Store.
+- **Next:** the Firefox Add-ons listing, which is waiting for Mozilla's review.
 - **Later:** organization repos, a Re-run button.
 
 ## License
