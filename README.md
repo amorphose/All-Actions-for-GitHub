@@ -31,18 +31,13 @@ The setup page opens automatically. After setup, open the list from the new Acti
 
 ### Firefox
 
-The Firefox Add-ons listing is waiting for Mozilla's review. Firefox only keeps add-ons that Mozilla has signed, so until then you can try it as a temporary add-on:
-
-1. Download **all-actions-for-github-firefox.zip** from the [latest release](https://github.com/amorphose/All-Actions-for-GitHub/releases/latest). (The other zip is for Chrome and Edge.)
-2. Open `about:debugging`, choose **This Firefox**, and click **Load Temporary Add-on**.
-3. Pick the zip (or `manifest.json` from the unzipped folder).
-4. If the setup page shows **Allow access to GitHub**, click **Allow access**. Firefox can leave the extension switched off on github.com until you agree.
-
-Firefox removes a temporary add-on when it closes, so load it again after you restart Firefox. Your connection and settings are kept. To update, load the newer zip the same way.
+Install **[All Actions for GitHub from Firefox Add-ons](https://addons.mozilla.org/firefox/addon/all-actions-for-github/)**. It needs Firefox 140 or later and updates itself. If the setup page shows **Allow access to GitHub**, click **Allow access**. Firefox can leave the extension switched off on github.com until you agree.
 
 ### Install from a release instead
 
-You can also load the extension yourself from a release zip in Chrome, Edge and other Chromium browsers. A copy installed this way doesn't update itself.
+You can also load the extension yourself from a release zip. A copy installed this way doesn't update itself.
+
+In Chrome, Edge and other Chromium browsers:
 
 1. Download **all-actions-for-github.zip** from the [latest release](https://github.com/amorphose/All-Actions-for-GitHub/releases/latest) and unzip it somewhere you'll keep it.
 2. Open your browser's extensions page:
@@ -51,6 +46,8 @@ You can also load the extension yourself from a release zip in Chrome, Edge and 
 3. Turn on **Developer mode**.
 4. Click **Load unpacked** and choose the unzipped folder (the one containing `manifest.json`).
 5. The setup page opens automatically. After setup, open the list from the new Actions icon on GitHub or the extension's toolbar icon.
+
+In Firefox, which only keeps add-ons that Mozilla has signed, you can load a release as a temporary add-on: download **all-actions-for-github-firefox.zip**, open `about:debugging`, choose **This Firefox**, click **Load Temporary Add-on** and pick the zip. Firefox removes it when it closes, so load it again after a restart. Your connection and settings are kept.
 
 #### Updating a copy installed from a release
 
@@ -114,7 +111,6 @@ GitHub runs schedules in UTC and often starts them hours late at busy times, so 
 
 ## Roadmap
 
-- **Next:** the Firefox Add-ons listing, which is waiting for Mozilla's review.
 - **Later:** organization repos, a Re-run button.
 
 ## License
